@@ -37,3 +37,59 @@ server.get("/products", async (request, response) => {
         response.status(500).send({ message: error.message });
     }
 });
+
+//to POST data to products collection
+server.post("/products", async (request, response) => {
+    
+
+    const{ id, productName, brand, quantity, image, price } = request.body
+    const newProduct = new Product({
+        id,
+        productName,
+        brand,
+        quantity,
+        image,
+        price,
+    });
+    try{
+        await newProduct.save();
+        console.log("New product added:", newProduct);
+        response.status(200).send({ message: "Product added successfully"});
+    }catch(error){
+        console.log("Error adding product:", error.message);
+        response.status(400).send({ message: error.message });
+    }
+});
+
+//to DELETE a product by id
+server.delete("/products/:id", async (request, response) => {
+    const { id } = request.params;
+    try{
+        const deletedProduct = await Product.findOneAndDelete({ id: id });
+        if(deletedProduct){
+            console.log("Deleted product:", deletedProduct);
+            response.status(200).send({ message: "Product deleted successfully"});
+        }
+    }catch(error){
+        response.status(400).send({ message: error.message });
+    }
+});
+
+//to UPDATE a product by id
+server.put("/products/:id", async (request, response) => {
+    const { id } = request.params;
+    const { productName, brand, quantity, image, price } = request.body;
+    try{
+        const updatedProduct = await Product.findOneAndUpdate(
+            { id: id },
+            { productName, brand, quantity, image, price },
+            { new: true }
+        );
+        if(updatedProduct){
+            console.log("Updated product:", updatedProduct);
+            response.status(200).send({ message: "Product updated successfully"});
+        }
+    }catch(error){
+        response.status(400).send({ message: error.message });
+    }
+});
